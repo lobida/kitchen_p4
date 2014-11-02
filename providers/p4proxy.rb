@@ -15,6 +15,13 @@ def load_current_resource
     @current_resource.port_num(@new_resource.port_num)
 end
 
+# check p4 port in use or not
+# check p4 proxy doc if already has this port or proxy test if it is up or not
+# if not be there add one line there and add to crontab
+def check_p4_port(port_num)
+
+end
+
 def create_p4_proxy
     puts "hello"
     #file = ::File.new('/tmp/p4p','w')
