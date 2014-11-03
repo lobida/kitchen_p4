@@ -12,14 +12,14 @@ bash "add gitlab hosts record" do
 end
 
 group "perforce" do
-    gid     2501
+    gid     2504
     not_if "id -g perforce"
     action :create
 end
 
 user "perforce" do
     comment "Perforce User"
-    uid     2501
+    uid     2504
     gid     "perforce"
     home    "/home/perforce"
     shell   "/bin/bash"
