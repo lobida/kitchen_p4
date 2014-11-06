@@ -18,6 +18,7 @@ end
 kitchen_p4_p4proxy "fcc_proxy_3333" do
     ipv4_address "127.0.0.1"
     port_num 3333
-    cach_path "/mnt/perforce/cache"
+    cach_path_root "/mnt/perforce/cache"
+    server_port "192.168.1.1:2222"
     action :create
 end
