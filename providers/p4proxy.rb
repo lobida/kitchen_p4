@@ -5,7 +5,7 @@ end
 action :create do
     converge_by("Create #{@new_resource}") do
         load_current_resource
-        if port_used?(@current_resource.ipv4_address, @current_resource.port_num)
+        if port_used?(@current_resource.local_ip, @current_resource.local_port)
             puts "ports used"
         else
             puts "not used"
@@ -17,15 +17,15 @@ end
 def load_current_resource
     @current_resource = Chef::Resource::KitchenP4P4proxy.new(@new_resource.name)
     @current_resource.name(@new_resource.name)
-    @current_resource.ipv4_address(@new_resource.ipv4_address || "0.0.0.0" )
-    @current_resource.port_num(@new_resource.port_num)
+    @current_resource.local_ip(@new_resource.local_ip)
+    @current_resource.local_port(@new_resource.local_port)
     @current_resource.cach_path_root(@new_resource.cach_path_root)
     @current_resource.p4p_version(@new_resource.p4p_version)
-    @current_resource.server_port(@new_resource.server_port)
+    @current_resource.server_socket(@new_resource.server_socket)
 end
 
-def port_used?(ipv4_address, port_num)
-    system("lsof -i@#{ipv4_address}:#{port_num}", out: '/dev/null')
+def port_used?(local_ip, local_port)
+    system("lsof -i@#{local_ip}:#{local_port}", out: '/dev/null')
 end
 
 def create_p4_proxy
@@ -50,7 +50,7 @@ def deploy_p4_proxy
     p4pscript       = "#{p4pbin_root}/#{@current_resource.name}/#{@current_resource.name}"
     p4plog          = "#{p4plog_root}/#{@current_resource.name}.log"
     p4pcach         = "#{@current_resource.cach_path_root}/#{@current_resource.name}"
-    p4plocal_socket = "#{@current_resource.ipv4_address}:#{@current_resource.port_num}"
+    p4plocal_socket = "#{@current_resource.local_ip}:#{@current_resource.local_port}"
 
     raise "no p4pbinary !" if ! ::File.exist?(p4pbin)
     raise "#{p4pbin_root}/#{@current_resource.name} exists" if ::File.exist?("#{p4pbin_root}/#{@current_resource.name}")
@@ -69,7 +69,7 @@ def deploy_p4_proxy
     FileUtils.mkdir_p "#{p4pbin_root}/#{@current_resource.name}"
     FileUtils.mkdir_p "#{p4pcach}"
     FileUtils.copy_file(p4pbin, "#{p4pbin_root}/#{@current_resource.name}/p4p")
-    ::File.open("#{p4pscript}", 'w') { |f| f.write("#{p4pbin_root}/#{@current_resource.name}/p4p -d -L #{p4plog} -p #{p4plocal_socket} -r #{p4pcach} -t #{@current_resource.server_port} \n") }
+    ::File.open("#{p4pscript}", 'w') { |f| f.write("#{p4pbin_root}/#{@current_resource.name}/p4p -d -L #{p4plog} -p #{p4plocal_socket} -r #{p4pcach} -t #{@current_resource.server_socket} \n") }
     FileUtils.chown_R 'perforce', 'perforce', "#{p4pcach}"
     FileUtils.chown_R 'perforce', 'perforce', "#{p4pbin_root}/#{@current_resource.name}"
     FileUtils.chmod_R 0755, "#{p4pbin_root}/#{@current_resource.name}"
